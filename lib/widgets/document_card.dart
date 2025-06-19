@@ -25,11 +25,11 @@ class DocumentCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // File icon and title
+              // Type icon and title
               Row(
                 children: [
                   Text(
-                    document.fileIcon,
+                    document.typeIcon,
                     style: const TextStyle(fontSize: 32),
                   ),
                   const SizedBox(width: 8),
@@ -38,13 +38,13 @@ class DocumentCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          document.title,
+                          document.displayTitle,
                           style: Theme.of(context).textTheme.titleMedium,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          document.fileName,
+                          document.typeLabel,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.grey[600],
                           ),
@@ -67,39 +67,70 @@ class DocumentCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // Description
-              if (document.description != null && document.description!.isNotEmpty)
-                Text(
-                  document.description!,
-                  style: Theme.of(context).textTheme.bodySmall,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-
-              const SizedBox(height: 8),
-
-              // Tags
-              if (document.tags.isNotEmpty)
-                Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: document.tags.take(3).map((tag) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              // Topic and Category
+              Row(
+                children: [
+                  if (document.topic.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
+                        color: Colors.blue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        tag,
+                        document.topic,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
+                          color: Colors.blue[700],
                           fontSize: 10,
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
+                    ),
+                  if (document.topic.isNotEmpty && document.category.isNotEmpty)
+                    const SizedBox(width: 8),
+                  if (document.category.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        document.category,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.green[700],
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+
+              // Content preview
+              if (document.isText && document.content != null)
+                Text(
+                  document.content!,
+                  style: Theme.of(context).textTheme.bodySmall,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                )
+              else if (document.isLink && document.link != null)
+                Text(
+                  document.link!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.blue[600],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                )
+              else if (document.isFile && document.fileName != null)
+                  Text(
+                    'File: ${document.fileName}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
 
               const SizedBox(height: 8),
 
@@ -113,7 +144,7 @@ class DocumentCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    document.fileSizeFormatted,
+                    document.typeLabel,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -127,35 +158,6 @@ class DocumentCard extends StatelessWidget {
                   ),
                 ],
               ),
-
-              // Public indicator
-              if (document.isPublic)
-                Container(
-                  margin: const EdgeInsets.only(top: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.public,
-                        size: 12,
-                        color: Colors.green[700],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Công khai',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.green[700],
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
             ],
           ),
         ),

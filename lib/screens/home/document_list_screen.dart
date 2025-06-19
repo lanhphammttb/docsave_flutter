@@ -148,7 +148,7 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
                                   onPressed: () {
                                     Navigator.of(context).pushNamedAndRemoveUntil(
                                       '/login',
-                                      (route) => false,
+                                          (route) => false,
                                     );
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -194,7 +194,7 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Hãy tải lên tài liệu đầu tiên của bạn',
+                              'Hãy tạo tài liệu đầu tiên của bạn',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Colors.grey[500],
                               ),
@@ -237,13 +237,13 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Icon(
-                                _getFileIcon(document.fileName),
+                                _getTypeIcon(document.type),
                                 color: Theme.of(context).colorScheme.primary,
                                 size: 24,
                               ),
                             ),
                             title: Text(
-                              document.fileName,
+                              document.displayTitle,
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
@@ -254,15 +254,24 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
                               children: [
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Kích thước: ${_formatFileSize(document.fileSize)}',
+                                  document.typeLabel,
                                   style: TextStyle(
                                     color: Colors.grey[600],
                                     fontSize: 12,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
+                                if (document.topic.isNotEmpty)
+                                  Text(
+                                    'Chủ đề: ${document.topic}',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                const SizedBox(height: 2),
                                 Text(
-                                  'Tải lên: ${_formatDate(document.createdAt)}',
+                                  'Tạo: ${_formatDate(document.createdAt)}',
                                   style: TextStyle(
                                     color: Colors.grey[600],
                                     fontSize: 12,
@@ -276,11 +285,11 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                               onSelected: (value) {
-                                if (value == 'download') {
-                                  // TODO: Implement download
+                                if (value == 'view') {
+                                  // TODO: Navigate to document detail
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Tính năng tải xuống đang được phát triển'),
+                                      content: Text('Tính năng xem chi tiết đang được phát triển'),
                                     ),
                                   );
                                 } else if (value == 'delete') {
@@ -289,12 +298,12 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
                               },
                               itemBuilder: (context) => [
                                 const PopupMenuItem(
-                                  value: 'download',
+                                  value: 'view',
                                   child: Row(
                                     children: [
-                                      Icon(Icons.download),
+                                      Icon(Icons.visibility),
                                       SizedBox(width: 8),
-                                      Text('Tải xuống'),
+                                      Text('Xem chi tiết'),
                                     ],
                                   ),
                                 ),
@@ -324,37 +333,17 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
     );
   }
 
-  IconData _getFileIcon(String fileName) {
-    final extension = fileName.split('.').last.toLowerCase();
-    switch (extension) {
-      case 'pdf':
-        return Icons.picture_as_pdf;
-      case 'doc':
-      case 'docx':
-        return Icons.description;
-      case 'xls':
-      case 'xlsx':
-        return Icons.table_chart;
-      case 'ppt':
-      case 'pptx':
-        return Icons.slideshow;
-      case 'txt':
+  IconData _getTypeIcon(String type) {
+    switch (type.toLowerCase()) {
+      case 'text':
         return Icons.text_snippet;
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-        return Icons.image;
-      default:
+      case 'file':
         return Icons.insert_drive_file;
+      case 'link':
+        return Icons.link;
+      default:
+        return Icons.description;
     }
-  }
-
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
   String _formatDate(DateTime date) {
@@ -369,7 +358,7 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
           borderRadius: BorderRadius.circular(16),
         ),
         title: const Text('Xác nhận xóa'),
-        content: Text('Bạn có chắc chắn muốn xóa tài liệu "${document.fileName}"?'),
+        content: Text('Bạn có chắc chắn muốn xóa tài liệu "${document.displayTitle}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -451,11 +440,11 @@ class DocumentSearchDelegate extends SearchDelegate<String> {
         final document = documents[index];
         return ListTile(
           leading: Text(
-            document.fileIcon,
+            document.typeIcon,
             style: const TextStyle(fontSize: 24),
           ),
-          title: Text(document.title),
-          subtitle: Text(document.fileName),
+          title: Text(document.displayTitle),
+          subtitle: Text(document.typeLabel),
           onTap: () {
             // TODO: Navigate to document detail
           },

@@ -1,95 +1,111 @@
 class Document {
   final String id;
   final String title;
-  final String? description;
-  final String fileName;
-  final String fileUrl;
-  final String fileType;
-  final int fileSize;
-  final String userId;
-  final List<String> tags;
-  final bool isPublic;
+  final String type; // 'text', 'file', 'link'
+  final String topic;
+  final String category;
+  final String userEmail;
+  final String? content; // chỉ có khi type = 'text'
+  final String? fileName; // chỉ có khi type = 'file'
+  final String? fileType; // chỉ có khi type = 'file'
+  final String? link; // chỉ có khi type = 'link'
   final DateTime createdAt;
   final DateTime updatedAt;
 
   Document({
     required this.id,
     required this.title,
-    this.description,
-    required this.fileName,
-    required this.fileUrl,
-    required this.fileType,
-    required this.fileSize,
-    required this.userId,
-    required this.tags,
-    required this.isPublic,
+    required this.type,
+    required this.topic,
+    required this.category,
+    required this.userEmail,
+    this.content,
+    this.fileName,
+    this.fileType,
+    this.link,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory Document.fromJson(Map<String, dynamic> json) {
     return Document(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
+      id: json['_id'] ?? '', // MongoDB ObjectId
+      title: json['title'] ?? '',
+      type: json['type'] ?? 'text',
+      topic: json['topic'] ?? '',
+      category: json['category'] ?? '',
+      userEmail: json['userEmail'] ?? '',
+      content: json['content'],
       fileName: json['fileName'],
-      fileUrl: json['fileUrl'],
       fileType: json['fileType'],
-      fileSize: json['fileSize'],
-      userId: json['userId'],
-      tags: List<String>.from(json['tags'] ?? []),
-      isPublic: json['isPublic'] ?? false,
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      link: json['link'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'].toString())
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'].toString())
+          : DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      '_id': id,
       'title': title,
-      'description': description,
+      'type': type,
+      'topic': topic,
+      'category': category,
+      'userEmail': userEmail,
+      'content': content,
       'fileName': fileName,
-      'fileUrl': fileUrl,
       'fileType': fileType,
-      'fileSize': fileSize,
-      'userId': userId,
-      'tags': tags,
-      'isPublic': isPublic,
+      'link': link,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
-  String get fileSizeFormatted {
-    if (fileSize < 1024) return '$fileSize B';
-    if (fileSize < 1024 * 1024) return '${(fileSize / 1024).toStringAsFixed(1)} KB';
-    if (fileSize < 1024 * 1024 * 1024) return '${(fileSize / (1024 * 1024)).toStringAsFixed(1)} MB';
-    return '${(fileSize / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+  // Helper getters
+  String get displayTitle => title.isNotEmpty ? title : 'Untitled Document';
+
+  String get typeIcon {
+    switch (type.toLowerCase()) {
+      case 'text':
+        return '��';
+      case 'file':
+        return '📁';
+      case 'link':
+        return '🔗';
+      default:
+        return '📄';
+    }
   }
 
-  String get fileIcon {
-    switch (fileType.toLowerCase()) {
-      case 'pdf':
-        return '📄';
-      case 'doc':
-      case 'docx':
-        return '📝';
-      case 'xls':
-      case 'xlsx':
-        return '📊';
-      case 'ppt':
-      case 'pptx':
-        return '📈';
-      case 'txt':
-        return '📃';
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-        return '🖼️';
+  String get typeLabel {
+    switch (type.toLowerCase()) {
+      case 'text':
+        return 'Text Document';
+      case 'file':
+        return 'File';
+      case 'link':
+        return 'Link';
       default:
-        return '📁';
+        return 'Document';
     }
+  }
+
+  bool get isText => type == 'text';
+  bool get isFile => type == 'file';
+  bool get isLink => type == 'link';
+
+  String get displayContent {
+    if (isText && content != null) {
+      return content!;
+    } else if (isLink && link != null) {
+      return link!;
+    } else if (isFile && fileName != null) {
+      return fileName!;
+    }
+    return 'No content available';
   }
 }

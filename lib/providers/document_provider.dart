@@ -111,13 +111,16 @@ class DocumentProvider with ChangeNotifier {
 
     return _documents.where((doc) {
       return doc.title.toLowerCase().contains(query.toLowerCase()) ||
-             doc.description?.toLowerCase().contains(query.toLowerCase()) == true ||
-             doc.tags.any((tag) => tag.toLowerCase().contains(query.toLowerCase()));
+          doc.topic.toLowerCase().contains(query.toLowerCase()) ||
+          doc.category.toLowerCase().contains(query.toLowerCase()) ||
+          (doc.content?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
+          (doc.fileName?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
+          (doc.link?.toLowerCase().contains(query.toLowerCase()) ?? false);
     }).toList();
   }
 
-  List<Document> getDocumentsByType(String fileType) {
-    return _documents.where((doc) => doc.fileType.toLowerCase() == fileType.toLowerCase()).toList();
+  List<Document> getDocumentsByType(String type) {
+    return _documents.where((doc) => doc.type.toLowerCase() == type.toLowerCase()).toList();
   }
 
   void _setLoading(bool loading) {
